@@ -1,0 +1,277 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!DOCTYPE rfc>
+
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<!-- used by XSLT processors -->
+<!-- For a complete list and description of processing instructions (PIs),
+     please see http://xml.resource.org/authoring/README.html. -->
+<!-- Below are generally applicable Processing Instructions (PIs) that most I-Ds might want to use.
+     (Here they are set differently than their defaults in xml2rfc v1.32) -->
+<?rfc strict="yes" ?>
+<!-- give errors regarding ID-nits and DTD validation -->
+<!-- control the table of contents (ToC) -->
+<?rfc toc="yes"?>
+<!-- generate a ToC -->
+<?rfc tocdepth="4"?>
+<!-- the number of levels of subsections in ToC. default: 3 -->
+<!-- control references -->
+<?rfc symrefs="yes"?>
+<!-- use symbolic references tags, i.e, [RFC2119] instead of [1] -->
+<?rfc sortrefs="yes" ?>
+<!-- sort the reference entries alphabetically -->
+<!-- control vertical white space
+     (using these PIs as follows is recommended by the RFC Editor) -->
+<?rfc compact="yes" ?>
+<!-- do not start each main section on a new page -->
+<?rfc subcompact="no" ?>
+<!-- keep one blank line between list items -->
+<!-- end of list of popular I-D processing instructions -->
+
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude"
+        category="info" consensus="true"
+        docName="draft-huque-dnsop-grease-00"
+        ipr="trust200902" updates="" obsoletes=""
+        submissionType="IETF" xml:lang="en"
+        tocInclude="true" tocDepth="4"
+        symRefs="true" sortRefs="true" version="3">
+
+  <!-- ***** FRONT MATTER ***** -->
+
+  <front>
+
+    <title abbrev="DNS Greasing">
+       Greasing Protocol Extension Points in the DNS
+    </title>
+    <seriesInfo name="Internet-Draft" value="draft-huque-dnsop-grease"/>
+
+    <author fullname="Shumon Huque" initials="S." surname="Huque">
+      <organization>Salesforce</organization>
+    </author>
+
+    <author fullname="Mark Andrews" initials="M." surname="Andrews">
+      <organization>Internet Systems Consortium</organization>
+    </author>
+
+    <date day="19" month="2" year="2024"/>
+    <!-- Meta-data Declarations -->
+
+    <area>General</area>
+    <workgroup>Internet Engineering Task Force</workgroup>
+    <keyword>Internet-Draft</keyword>
+    <keyword>DNS</keyword>
+    <keyword>Grease</keyword>
+    <keyword>Protocol</keyword>
+    <keyword>Extensibility</keyword>
+    <keyword>Evolvability</keyword>
+    <keyword>Maintainability</keyword>
+
+    <abstract>
+     <t>
+        Long term evolvability of the Domain Name System (DNS) protocol
+        requires the ability to support change. Greasing is one technique
+        that exercises the regular use of unallocated protocol extension
+        points to prevent ossification of their current usage patterns
+        by middleboxes or DNS implementations. This document describes
+        considerations and proposals for applying grease to the DNS protocol.
+     </t>
+    </abstract>
+
+    <note removeInRFC="true">
+       <name>Discussion Venues</name>
+       <t>Source for this draft and an issue tracker can be found at
+       <eref target="https://github.com/shuque/ietf-dns-grease"/>.</t>
+    </note>
+
+  </front>
+
+  <middle>
+
+    <section anchor="intro" numbered="true" toc="default">
+      <name>Introduction</name>
+      <t>
+        Long term evolvability of the Domain Name System (DNS) protocol
+        requires the ability to support change.
+        <xref target="GREASING">Greasing</xref> is one technique
+        that exercises the regular use of unallocated protocol extension
+        points to prevent ossification of their current usage patterns
+        by middleboxes or DNS implementations.
+      </t>
+      <t>
+        Greasing was originally developed for the TLS protocol
+        <xref target="RFC8701" />. Ongoing discussion of improving
+        the technique as well as applying it more generally to other
+        protocols continues in the IETF.
+      </t>
+      <t>
+        This document outlines considerations and proposals for
+        applying grease to the
+        <xref target="RFC1034" /><xref target="RFC1035" />
+        Domain Name System (DNS).
+      </t>
+    </section>
+
+    <section anchor="opportunities" numbered="true" toc="default">
+      <name>Greasing Opportunities</name>
+      <t>
+        The DNS protocol has a number of protocol elements where the
+        greasing of unallocated codepoints could be employed. Some of
+        them are listed in the table below.
+      </t>
+
+      <table>
+        <thead>
+          <tr><th>Protocol Element</th><th>Size</th><th>Number of Values</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>DNS Header Flags</td><td>7-bits</td><td>7</td></tr>
+          <tr><td>Resource Record Type</td><td>16-bits</td><td>65,536</td></tr>
+          <tr><td>Opcode</td><td>4-bits</td><td>16</td></tr>
+          <tr><td>EDNS Version</td><td>8-bits</td><td>256</td></tr>
+          <tr><td>EDNS Header Flags</td><td>16-bits</td><td>16</td></tr>
+          <tr><td>EDNS Opt Code</td><td>16-bits</td><td>65,536</td></tr>
+        </tbody>
+      </table>
+
+      <t>
+        The goals of periodically exercising the use of unallocated
+        code points are to (1) discourage and prevent middleboxes and
+        DNS implementations from hardcoding notions of what are the only
+        allowable protocol parameter values, and (2) to prevent future
+        extensibility failures by not causing them to malfunction
+        in the presence of new values when they are defined.
+      </t>
+      <t>
+        Note that <xref target="RFC6891">EDNS</xref>
+        options have a more complex structure involving both a code
+        point and data. So greasing EDNS options would also require
+        generating some random option data.
+      </t>
+      <t>
+        Correctly implemented DNS servers will ignore these values and
+        interoperate. Servers that do not tolerate unknown values will
+        fail to interoperate and return an error (or may fail to respond).
+        These failures could be logged and be used to identify broken
+        implementations in the field that could be targeted for repair.
+        DNS resolvers will retry such failed queries without the
+        unallocated codepoint.
+      </t>
+    </section>
+
+    <section anchor="reserving" numbered="true" toc="default">
+      <name>Randomized or Reserved code points</name>
+      <t>
+        DNS resolver implementations are proposed to periodically
+        advertise unallocated code points at random in requests that
+        they send out.
+      </t>
+      <t>
+        They could select randomly from the unallocated
+        range, but then would have to consider what happens when such
+        code points are allocated in the future and whether they can
+        deal with that situation gracefully. Alternatively, we could
+        reserve a subset of the currently unused values for DNS
+        resolver implementations to advertise at random. Some DNS
+        protocol elements have only a small range of supported values,
+        and may not be amenable to reserving a subset of that range.
+      </t>
+    </section>
+
+    <section anchor="reserved-values" numbered="true" toc="default">
+      <name>Reserved Code Point Values</name>
+      <t>
+        [TBD]
+      </t>
+    </section>
+
+    <section anchor="sampling" numbered="true" toc="default">
+      <name>Sampled Selection of Traffic</name>
+      <t>
+        To avoid the overhead of needing to retry many queries in the
+        event of large scale intolerance of unallocated code points, only
+        a sampled fraction of DNS requests emitted by a resolver should
+        advertise unallocated code points. Many DNS resolvers are very
+        high transaction rate systems, so only a small sample size of
+        such DNS requests is sufficient to get a rough picture of
+        non-compliant servers, perhaps 1 in 1000 requests? Furthermore,
+        a community effort of aggregating and analysing the results of
+        failed queries from many DNS resolver operators can provide an
+        even more comprehensive view of the ecosystem.
+      </t>
+    </section>
+
+    <section anchor="telemetry" numbered="true" toc="default">
+      <name>Telemetry and Results Evaluation</name>
+      <t>
+        DNS resolvers are expected to record the results of failures
+        from the use of unallocated code points. This could be in a
+        traditional log file, or a more complex centralized telemetry
+        system. Additionally, the
+        <xref target="ERROR-RPT">DNS Error Reporting</xref> mechanism
+        could be employed to proactively notify operators that their
+        authoritative DNS servers are deficient.
+      </t>
+    </section>
+
+    <section anchor="operational" numbered="true" toc="default">
+      <name>Operational Implications</name>
+      <t>
+        Lorem ipsum ..
+      </t>
+    </section>
+
+    <section anchor="security" numbered="true" toc="default">
+      <name>Security Considerations</name>
+      <t>
+        Lorem ipsum ..
+      </t>
+    </section>
+
+    <section anchor="iana" numbered="true" toc="default">
+      <name>IANA Considerations</name>
+      <t>
+        [If reserved code point ranges are decided, IANA will need to
+        formally reserve them in a registry.]
+      </t>
+    </section>
+
+  </middle>
+
+  <!--  *****BACK MATTER ***** -->
+
+  <back>
+
+    <references>
+      <name>References</name>
+      <references>
+        <name>Normative References</name>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.1035.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml"/>
+      </references>
+      <references>
+        <name>Informative References</name>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8701.xml"/>
+        <reference anchor="GREASING"
+                 target="https://datatracker.ietf.org/doc/html/draft-edm-protocol-greasing">
+          <front>
+            <title>Maintaining Protocols Using Grease and Variability</title>
+            <author fullname="Lucas Pardue" initials="L" surname="Pardue" />
+            <date />
+          </front>
+      </reference>
+        <reference anchor="ERROR-RPT"
+                 target="https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-dns-error-reporting">
+          <front>
+            <title>DNS Error Reporting</title>
+            <author fullname="Roy Arends" initials="R" surname="Arends" />
+            <author fullname="Matt Larson" initials="M" surname="Larson" />
+            <date />
+          </front>
+      </reference>
+      </references>
+    </references>
+
+  </back>
+
+</rfc>
