@@ -53,7 +53,7 @@
       <organization>Internet Systems Consortium</organization>
     </author>
 
-    <date day="19" month="2" year="2024"/>
+    <date day="20" month="2" year="2024"/>
     <!-- Meta-data Declarations -->
 
     <area>General</area>
@@ -111,11 +111,41 @@
       </t>
     </section>
 
+    <section anchor="background" numbered="true" toc="default">
+      <name>Background</name>
+      <t>
+        Historically, DNS protocol evolution has encountered some
+        significant deployment barriers. There are various reasons,
+        including outdated systems, inertia, faulty implementations of
+        DNS servers, middleboxes that have actively blocked the deployment
+        of new protocol features, etc. Over time as some of these
+        impediments have been uncovered and repaired, progress has
+        been possible. However, a more systematic approach to ensure
+        future progress is desirable.
+      </t>
+      <t>
+        Remarkably, the Extension Mechanisms for DNS (EDNS)
+        specification,
+        <xref target="RFC2671">originally published in 1999</xref>,
+        is still not universally deployed, and often deployed
+        incorrectly or incompletely. This eventually resulted in
+        the exercise of a <xref target="FLAGDAY">DNS Flag Day effort</xref>
+        to identity and eradicate implementations and network paths not
+        compliant with the specification. Tools like ednscomp.isc.org
+        have been testing this and other protocol defects in deployed
+        infrastructure for many years. Even then, some level of incorrect
+        behavior remains prevalent, necessitating probing and
+        pre-arrangement of the use of some extension features like
+        <xref target="RFC7871" />EDNS Client Subnet and
+        <xref target="RFC7873" />DNS Cookies.
+      </t>
+    </section>
+
     <section anchor="opportunities" numbered="true" toc="default">
       <name>Greasing Opportunities</name>
       <t>
         The DNS protocol has a number of protocol elements where the
-        greasing of unallocated codepoints could be employed. Some of
+        greasing of unallocated code points could be employed. Some of
         them are listed in the table below.
       </t>
 
@@ -153,8 +183,8 @@
         fail to interoperate and return an error (or may fail to respond).
         These failures could be logged and be used to identify broken
         implementations in the field that could be targeted for repair.
-        DNS resolvers will retry such failed queries without the
-        unallocated codepoint.
+        DNS resolvers should retry such failed queries without the
+        unallocated code point.
       </t>
     </section>
 
@@ -213,11 +243,21 @@
       </t>
     </section>
 
-    <section anchor="operational" numbered="true" toc="default">
-      <name>Operational Implications</name>
+    <section anchor="detailed" numbered="true" toc="default">
+      <name>Detailed Behavior</name>
       <t>
-        Lorem ipsum ..
+        Work in-progress section .. Some topics to expand on:
       </t>
+      <ul spacing="normal">
+        <li>Detailed expected behavior of DNS resolvers/clients.</li>
+        <li>Detailed expected behavior of DNS servers.</li>
+        <li>Settings: nameservers should be shipped with a default
+            end-of-test date to prevent tests from interfering with
+            future code point assignments.</li>
+        <li>Testing should be multi-factored.</li>
+        <li>Tests should be able to be individually disabled.</li>
+        <li>Sharing telemetry.</li>
+      </ul>
     </section>
 
     <section anchor="security" numbered="true" toc="default">
@@ -251,6 +291,9 @@
       </references>
       <references>
         <name>Informative References</name>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2671.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7871.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7873.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8701.xml"/>
         <reference anchor="GREASING"
                  target="https://datatracker.ietf.org/doc/html/draft-edm-protocol-greasing">
@@ -266,6 +309,14 @@
             <title>DNS Error Reporting</title>
             <author fullname="Roy Arends" initials="R" surname="Arends" />
             <author fullname="Matt Larson" initials="M" surname="Larson" />
+            <date />
+          </front>
+      </reference>
+        <reference anchor="FLAGDAY"
+                 target="https://www.isc.org/blogs/dns-flag-day/">
+          <front>
+            <title>DNS Flag Day 2019</title>
+            <author fullname="Internet Systems Consortium" surname="ISC" />
             <date />
           </front>
       </reference>
