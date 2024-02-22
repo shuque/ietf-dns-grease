@@ -53,7 +53,7 @@
       <organization>Internet Systems Consortium</organization>
     </author>
 
-    <date day="20" month="2" year="2024"/>
+    <date day="22" month="2" year="2024"/>
     <!-- Meta-data Declarations -->
 
     <area>General</area>
@@ -144,9 +144,9 @@
     <section anchor="opportunities" numbered="true" toc="default">
       <name>Greasing Opportunities</name>
       <t>
-        The DNS protocol has a number of protocol elements where the
-        greasing of unallocated code points could be employed. Some of
-        them are listed in the table below.
+        The DNS has a number of protocol elements where the greasing of
+        unallocated code points could be employed. Some of them are
+        listed in the table below.
       </t>
 
       <table>
@@ -184,7 +184,7 @@
         These failures could be logged and be used to identify broken
         implementations in the field that could be targeted for repair.
         DNS resolvers should retry such failed queries without the
-        unallocated code point.
+        unallocated extension.
       </t>
     </section>
 
@@ -196,21 +196,28 @@
         they send out.
       </t>
       <t>
-        They could select randomly from the unallocated
+        Resolvers could select randomly from the unallocated
         range, but then would have to consider what happens when such
-        code points are allocated in the future and whether they can
-        deal with that situation gracefully. Alternatively, we could
-        reserve a subset of the currently unused values for DNS
-        resolver implementations to advertise at random. Some DNS
-        protocol elements have only a small range of supported values,
-        and may not be amenable to reserving a subset of that range.
+        code points are allocated in the future and whether or not that
+        will give rise to a different class of interoperability failure.
+      </t>
+      <t>
+        Alternatively, a subset of the currently unused values could
+        be reserved for DNS resolver implementations to advertise at
+        random. The expectation is that receivers will have uniform
+        handling of unknown code points whether they fall in a
+        reserved range or not. But there is a slight risk that the
+        reserved values could then become ossified in implementations.
+        Furthermore, Some DNS protocol elements have only a small range
+        of supported values, and it may not be practical to reserve a
+        subset of such ranges.
       </t>
     </section>
 
     <section anchor="reserved-values" numbered="true" toc="default">
       <name>Reserved Code Point Values</name>
       <t>
-        [TBD]
+        [Propose reserved ranges for some DNS protocol elements]
       </t>
     </section>
 
@@ -236,10 +243,16 @@
         DNS resolvers are expected to record the results of failures
         from the use of unallocated code points. This could be in a
         traditional log file, or a more complex centralized telemetry
-        system. Additionally, the
+        system.
+      </t>
+      <t>
+        Additionally, the
         <xref target="ERROR-RPT">DNS Error Reporting</xref> mechanism
         could be employed to proactively notify operators that their
-        authoritative DNS servers are deficient.
+        authoritative DNS servers are deficient. (Note however that
+        the error reporting mechanism employs an EDNS option, so some
+        classes of EDNS protocol non-compliance may not be able to be
+        reported.)
       </t>
     </section>
 
@@ -251,6 +264,8 @@
       <ul spacing="normal">
         <li>Detailed expected behavior of DNS resolvers/clients.</li>
         <li>Detailed expected behavior of DNS servers.</li>
+        <li>Detection of errors.</li>
+        <li>Fallback behavior (or not).</li>
         <li>Settings: nameservers should be shipped with a default
             end-of-test date to prevent tests from interfering with
             future code point assignments.</li>
@@ -263,7 +278,22 @@
     <section anchor="security" numbered="true" toc="default">
       <name>Security Considerations</name>
       <t>
-        Lorem ipsum ..
+        If an implementation does not select GREASE values at random,
+        it may allow others to fingerprint specific resolvers or
+        resolver implementations.
+      </t>
+      <t>
+        Some DNS resolver implementations have traditionally resorted
+        to falling back to retrying queries with various extension
+        options disabled in the face of interoperability problems.
+        Depending on the specific extension affected, this may allow
+        an adversary to silently disable a security feature. Greasing
+        of unallocated code points aims to identify such interoperability
+        problems and help DNS resolver operators and implementations to
+        decide when it is ok to disable fallback behavior for future
+        extensions. Hence, this mechanism is expected to generally
+        reduce the need for resolver fallback behavior, and improve
+        security over time.
       </t>
     </section>
 
@@ -271,7 +301,10 @@
       <name>IANA Considerations</name>
       <t>
         [If reserved code point ranges are decided, IANA will need to
-        formally reserve them in a registry.]
+        formally reserve them in the relevant protocol parameter
+        registries. The annotation "Reserved for Greasing" should be
+        employed to clearly distinguish such ranges from other ranges
+        that might be reserved for private use or other purposes.]
       </t>
     </section>
 
