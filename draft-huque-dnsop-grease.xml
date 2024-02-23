@@ -47,10 +47,16 @@
 
     <author fullname="Shumon Huque" initials="S." surname="Huque">
       <organization>Salesforce</organization>
+      <address>
+        <email>shuque@gmail.com</email>
+      </address>
     </author>
 
     <author fullname="Mark Andrews" initials="M." surname="Andrews">
       <organization>Internet Systems Consortium</organization>
+      <address>
+        <email>marka@isc.org</email>
+      </address>
     </author>
 
     <date day="22" month="2" year="2024"/>
