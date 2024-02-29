@@ -30,7 +30,7 @@
 
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude"
         category="info" consensus="true"
-        docName="draft-huque-dnsop-grease-00"
+        docName="draft-huque-dnsop-grease-01"
         ipr="trust200902" updates="" obsoletes=""
         submissionType="IETF" xml:lang="en"
         tocInclude="true" tocDepth="4"
@@ -59,7 +59,7 @@
       </address>
     </author>
 
-    <date day="22" month="2" year="2024"/>
+    <date day="29" month="2" year="2024"/>
     <!-- Meta-data Declarations -->
 
     <area>General</area>
@@ -121,7 +121,7 @@
       <name>Background</name>
       <t>
         Historically, DNS protocol evolution has encountered some
-        significant deployment barriers. There are various reasons,
+        significant barriers. There are various reasons,
         including outdated systems, inertia, faulty implementations of
         DNS servers, middleboxes that have actively blocked the deployment
         of new protocol features, etc. Over time as some of these
@@ -136,12 +136,13 @@
         is still not universally deployed, and often deployed
         incorrectly or incompletely. This eventually resulted in
         the exercise of a <xref target="FLAGDAY">DNS Flag Day effort</xref>
-        to identity and eradicate implementations and network paths not
+        to identify and eradicate implementations and network paths not
         compliant with the specification. Tools like ednscomp.isc.org
-        have been testing this and other protocol defects in deployed
-        infrastructure for many years. Even then, some level of incorrect
-        behavior remains prevalent, necessitating probing and
-        pre-arrangement of the use of some extension features like
+        <xref target="EDNSCOMP" /> have been testing this and other
+        protocol defects in deployed infrastructure for many years.
+        Even then, some level of incorrect behavior remains prevalent,
+        necessitating probing and pre-arrangement of the use of some
+        extension features like
         <xref target="RFC7871" />EDNS Client Subnet and
         <xref target="RFC7873" />DNS Cookies.
       </t>
@@ -171,11 +172,18 @@
 
       <t>
         The goals of periodically exercising the use of unallocated
-        code points are to (1) discourage and prevent middleboxes and
+        code points are (1) to discourage and prevent middleboxes and
         DNS implementations from hardcoding notions of what are the only
         allowable protocol parameter values, and (2) to prevent future
         extensibility failures by not causing them to malfunction
         in the presence of new values when they are defined.
+      </t>
+      <t>
+        If and when encrypted transports are common on the DNS resolver
+        to authoritative server path, middleboxes will have less
+        capability to interfere with DNS traffic. Greasing would still
+        however continue to be useful for identifying deficient DNS
+        proxies, load balancers, authoritative servers, etc.
       </t>
       <t>
         Note that <xref target="RFC6891">EDNS</xref>
@@ -189,8 +197,10 @@
         fail to interoperate and return an error (or may fail to respond).
         These failures could be logged and be used to identify broken
         implementations in the field that could be targeted for repair.
-        DNS resolvers should retry such failed queries without the
-        unallocated extension.
+        DNS resolvers should generally retry such failed queries without
+        the unallocated extension, except for greasing operations where
+        new queries are constructed (for example, greasing new resource
+        record types).
       </t>
     </section>
 
@@ -206,6 +216,8 @@
         range, but then would have to consider what happens when such
         code points are allocated in the future and whether or not that
         will give rise to a different class of interoperability failure.
+        One possible way to deal with this is for software to have
+        pre-configured or configurable end-of-test dates.
       </t>
       <t>
         Alternatively, a subset of the currently unused values could
@@ -216,7 +228,10 @@
         reserved values could then become ossified in implementations.
         Furthermore, Some DNS protocol elements have only a small range
         of supported values, and it may not be practical to reserve a
-        subset of such ranges.
+        a subset of such ranges. Some larger ranges also have a sub
+        structure, such as the data vs meta vs q-type classification
+        of the RR-type space, where multiple greasing ranges would need
+        to be reserved.
       </t>
     </section>
 
@@ -355,6 +370,14 @@
                  target="https://www.isc.org/blogs/dns-flag-day/">
           <front>
             <title>DNS Flag Day 2019</title>
+            <author fullname="Internet Systems Consortium" surname="ISC" />
+            <date />
+          </front>
+      </reference>
+        <reference anchor="EDNSCOMP"
+                 target="https://ednscomp.isc.org/">
+          <front>
+            <title>EDNS Compliance Tester</title>
             <author fullname="Internet Systems Consortium" surname="ISC" />
             <date />
           </front>
