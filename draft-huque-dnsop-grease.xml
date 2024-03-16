@@ -59,7 +59,7 @@
       </address>
     </author>
 
-    <date day="29" month="2" year="2024"/>
+    <date day="17" month="3" year="2024"/>
     <!-- Meta-data Declarations -->
 
     <area>General</area>
@@ -270,10 +270,7 @@
         Additionally, the
         <xref target="ERROR-RPT">DNS Error Reporting</xref> mechanism
         could be employed to proactively notify operators that their
-        authoritative DNS servers are deficient. (Note however that
-        the error reporting mechanism employs an EDNS option, so some
-        classes of EDNS protocol non-compliance may not be able to be
-        reported.)
+        authoritative DNS servers are deficient.
       </t>
     </section>
 
